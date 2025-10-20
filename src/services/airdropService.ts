@@ -1,22 +1,20 @@
-import { airdropFactory, createSolanaRpc, createSolanaRpcSubscriptions, lamports, address } from '@solana/kit';
-import { SOLANA_RPC_URL, SOLANA_WS_URL, LAMPORTS_PER_SOL } from '../constants';
+import { createSolanaRpc, address, lamports } from '@solana/kit';
+import { SOLANA_RPC_URL, LAMPORTS_PER_SOL } from '../constants';
 
 export const requestAirdrop = async (recipientAddress: string): Promise<string> => {
   try {
-    // Create RPC connections using @solana/kit
+    console.log('Requesting airdrop for address:', recipientAddress);
+    r
+    // Create RPC connection using @solana/kit
     const rpc = createSolanaRpc(SOLANA_RPC_URL);
-    const rpcSubscriptions = createSolanaRpcSubscriptions(SOLANA_WS_URL);
     
-    // Create airdrop factory function
-    const airdrop = airdropFactory({ rpc, rpcSubscriptions });
+    // Convert address to @solana/kit address type
+    const solanaAddress = address(recipientAddress);
     
-    // Request airdrop using factory function
-    const signature = await airdrop({
-      commitment: 'processed',
-      lamports: lamports(BigInt(LAMPORTS_PER_SOL)), // 1 SOL
-      recipientAddress: address(recipientAddress)
-    });
+    // Request airdrop using direct RPC call
+    const signature = await rpc.requestAirdrop(solanaAddress, lamports(BigInt(LAMPORTS_PER_SOL))).send();
     
+    console.log('Airdrop successful, signature:', signature);
     return signature;
   } catch (error) {
     console.error('Error requesting airdrop:', error);

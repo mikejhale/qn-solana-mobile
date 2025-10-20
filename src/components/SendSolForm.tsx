@@ -2,19 +2,22 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Modal } from 'react-native';
 import { styles } from '../styles';
 import { transferSol } from '../services/transferService';
+import { formatSolAmount } from '../utils/addressUtils';
 
 interface SendSolFormProps {
   currentBalance: number;
   walletAddress: string;
   onBack: () => void;
   onSuccess: (amount: string, recipientAddress: string) => void;
+  refreshBalance: () => Promise<void>;
 }
 
 export const SendSolForm: React.FC<SendSolFormProps> = ({
   currentBalance,
   walletAddress,
   onBack,
-  onSuccess
+  onSuccess,
+  refreshBalance
 }) => {
   const [recipientAddress, setRecipientAddress] = useState('Eyp27X1g5f89Y5BYXYFf4a583w6nqFc52FDu1ftmHrXs');
   const [amount, setAmount] = useState('0.01');
@@ -36,21 +39,11 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
       // Call the actual transfer service
       const signature = await transferSol(walletAddress, recipientAddress, amountNum);
       
+      // Refresh the balance after successful transfer
+      await refreshBalance();
+      
       // Call onSuccess immediately to close the form and show confirmation
       onSuccess(amount, recipientAddress);
-      
-      Alert.alert(
-        'Transfer Successful',
-        `Successfully sent ${amount} SOL to ${recipientAddress.slice(0, 8)}...\n\nTransaction: ${signature.slice(0, 8)}...`,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Form is already closed, just acknowledge
-            }
-          }
-        ]
-      );
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -95,7 +88,7 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
           <Text style={styles.insufficientFundsText}>Insufficient funds</Text>
         )}
         <Text style={styles.balanceText}>
-          Available: {currentBalance.toFixed(4)} SOL
+          Available: {formatSolAmount(currentBalance)} SOL
         </Text>
       </View>
 

@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { styles } from '../styles';
 import { useAirdrop } from '../hooks/useAirdrop';
 import { ErrorModal } from './ErrorModal';
 import { SendSolForm } from './SendSolForm';
+import { formatSolAmount } from '../utils/addressUtils';
 
 interface BalanceDisplayProps {
   balance: number | null;
   loading: boolean;
   error: string | null;
   walletAddress: string;
+  refreshBalance: () => Promise<void>;
 }
 
 export const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ 
   balance, 
   loading, 
   error, 
-  walletAddress 
+  walletAddress,
+  refreshBalance
 }) => {
   const { requestAirdrop, isRequesting, error: airdropError } = useAirdrop();
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -29,6 +32,8 @@ export const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
       const signature = await requestAirdrop(walletAddress);
       if (signature) {
         Alert.alert('Success', `Airdrop successful! Transaction: ${signature.slice(0, 8)}...`);
+        // Refresh the balance after successful airdrop
+        await refreshBalance();
       } else {
         setErrorModalData({
           title: 'Airdrop Failed',
@@ -66,25 +71,35 @@ export const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
         onSuccess={(amount: string, recipientAddress: string) => {
           // Set confirmation first
           setSendConfirmation({ amount, address: recipientAddress });
-          // Clear confirmation after 5 seconds
-          setTimeout(() => setSendConfirmation(null), 5000);
           // Close the form
           setShowSendForm(false);
         }}
+        refreshBalance={refreshBalance}
       />
     );
   }
 
   return (
     <View style={styles.balanceContainer}>
-      <Text style={styles.balanceTitle}>SOL Balance</Text>
-      {loading ? (
-        <Text style={styles.balanceAmount}>Loading...</Text>
-      ) : error ? (
-        <Text style={styles.balanceError}>Error loading balance</Text>
-      ) : (
-        <Text style={styles.balanceAmount}>{balance?.toFixed(4)} SOL</Text>
-      )}
+      <View style={styles.balanceTitleRow}>
+        <Text style={styles.balanceTitle}>SOL Balance</Text>
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={refreshBalance}
+          disabled={loading}
+        >
+          <Text style={styles.refreshIcon}>↻</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.balanceDisplayContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#9945FF" />
+        ) : error ? (
+          <Text style={styles.balanceError}>Error loading balance</Text>
+        ) : (
+          <Text style={styles.balanceAmount}>{formatSolAmount(balance || 0)} SOL</Text>
+        )}
+      </View>
       
       <View style={styles.buttonRow}>
         <TouchableOpacity

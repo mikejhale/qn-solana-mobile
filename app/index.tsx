@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Alert } from 'react-native';
+import { View, Alert, InteractionManager } from 'react-native';
 import { useSolBalance } from '../src/hooks/useSolBalance';
-import { connectWallet } from '../src/services/walletService';
+import { connectWallet, disconnectWallet as disconnectWalletService } from '../src/services/walletService';
 import { Header } from '../src/components/Header';
 import { BalanceDisplay } from '../src/components/BalanceDisplay';
 import { ConnectScreen } from '../src/components/ConnectScreen';
@@ -15,17 +15,27 @@ export default function App() {
   const [showDisconnectMenu, setShowDisconnectMenu] = useState(false);
   
   // Use the custom hook to fetch SOL balance
-  const { balance, loading: balanceLoading, error: balanceError } = useSolBalance(connectedAddress);
+  const { balance, loading: balanceLoading, error: balanceError, refreshBalance } = useSolBalance(connectedAddress);
 
-  const disconnectWallet = () => {
-    setConnectedAddress(null);
-    setShowDisconnectMenu(false);
-    Alert.alert('Disconnected', 'Wallet disconnected successfully');
+  const disconnectWallet = async () => {
+    try {
+      await disconnectWalletService();
+      setConnectedAddress(null);
+      setShowDisconnectMenu(false);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+      // Still clear the local state even if service call fails
+      setConnectedAddress(null);
+      setShowDisconnectMenu(false);
+    }
   };
 
   const handleConnectWallet = async () => {
     try {
       setIsConnecting(true);
+
+      // Wait for all interactions to complete before starting connection
+      await new Promise(resolve => InteractionManager.runAfterInteractions(resolve));
 
       // Add timeout to prevent infinite spinning
       const timeoutPromise = new Promise((_, reject) => {
@@ -37,13 +47,14 @@ export default function App() {
       const addressString = await Promise.race([connectionPromise, timeoutPromise]) as string;
       
       setConnectedAddress(addressString);
-      Alert.alert('Success', `Connected to: ${addressString}`);
     } catch (error) {
       console.error('Connection failed:', error);
       let errorMessage = 'Failed to connect to wallet';
       
       if (error.message.includes('timeout')) {
         errorMessage = 'Connection timed out. Please try again.';
+      } else if (error.message.includes('authorization request declined')) {
+        errorMessage = 'Authorization was declined. Please try connecting again and make sure to approve the request in your wallet.';
       } else if (error.message.includes('User rejected') || error.message.includes('rejected')) {
         errorMessage = 'Connection was rejected by user.';
       } else if (error.message.includes('No wallet found')) {
@@ -87,6 +98,7 @@ export default function App() {
             loading={balanceLoading}
             error={balanceError}
             walletAddress={connectedAddress}
+            refreshBalance={refreshBalance}
           />
         ) : (
           <ConnectScreen
