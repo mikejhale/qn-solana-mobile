@@ -192,7 +192,8 @@ export const styles = StyleSheet.create({
   sendFormContainer: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 50,
   },
   sendFormTitle: {
     fontSize: 24,
@@ -203,6 +204,7 @@ export const styles = StyleSheet.create({
   },
   formField: {
     marginBottom: 20,
+    width: '100%',
   },
   formLabel: {
     fontSize: 16,
@@ -218,11 +220,17 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#fff',
+    width: '100%',
+    maxWidth: '100%',
   },
   formInputDisabled: {
     backgroundColor: '#f5f5f5',
     borderColor: '#ccc',
     color: '#999',
+  },
+  recipientInput: {
+    minWidth: '100%',
+    flex: 1,
   },
   insufficientFundsText: {
     fontSize: 14,

@@ -16,7 +16,7 @@ export const ConnectScreen: React.FC<ConnectScreenProps> = ({
   return (
     <>
       <Text style={styles.title}>gm!</Text>
-      <Text style={styles.subtitle}>Welcome to your Solana dApp</Text>
+      <Text style={styles.subtitle}>Welcome to your Solana Mobile App</Text>
       <View style={styles.connectContainer}>
         <TouchableOpacity
           style={[styles.mainConnectButton, isConnecting && styles.buttonDisabled]}

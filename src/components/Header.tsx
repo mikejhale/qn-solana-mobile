@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
   return (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>Solana dApp</Text>
+      <Text style={styles.headerTitle}>Solana Mobile App</Text>
       {connectedAddress ? (
         <View style={styles.addressContainer}>
           <TouchableOpacity

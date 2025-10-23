@@ -19,17 +19,18 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
   onSuccess,
   refreshBalance
 }) => {
-  const [recipientAddress, setRecipientAddress] = useState('Eyp27X1g5f89Y5BYXYFf4a583w6nqFc52FDu1ftmHrXs');
-  const [amount, setAmount] = useState('0.01');
+  const [recipientAddress, setRecipientAddress] = useState('');
+  const [amount, setAmount] = useState('');
   const [isSending, setIsSending] = useState(false);
 
   const amountNum = parseFloat(amount) || 0;
   const hasInsufficientFunds = amountNum > currentBalance;
   const isValidAmount = amountNum > 0 && amountNum <= currentBalance;
   const isValidAddress = recipientAddress.length > 0;
+  const isOwnAddress = recipientAddress.toLowerCase() === walletAddress.toLowerCase();
 
   const handleSend = async () => {
-    if (!isValidAmount || !isValidAddress) {
+    if (!isValidAmount || !isValidAddress || isOwnAddress) {
       return;
     }
 
@@ -60,7 +61,7 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
       <View style={styles.formField}>
         <Text style={styles.formLabel}>Recipient Address</Text>
         <TextInput
-          style={[styles.formInput, isSending && styles.formInputDisabled]}
+          style={[styles.formInput, styles.recipientInput, isSending && styles.formInputDisabled]}
           value={recipientAddress}
           onChangeText={setRecipientAddress}
           placeholder="Enter Solana wallet address"
@@ -87,6 +88,9 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
         {hasInsufficientFunds && (
           <Text style={styles.insufficientFundsText}>Insufficient funds</Text>
         )}
+        {isOwnAddress && recipientAddress.length > 0 && (
+          <Text style={styles.insufficientFundsText}>Cannot send to your own address</Text>
+        )}
         <Text style={styles.balanceText}>
           Available: {formatSolAmount(currentBalance)} SOL
         </Text>
@@ -104,10 +108,10 @@ export const SendSolForm: React.FC<SendSolFormProps> = ({
         <TouchableOpacity
           style={[
             styles.sendFormSendButton,
-            (!isValidAmount || !isValidAddress || isSending) && styles.buttonDisabled
+            (!isValidAmount || !isValidAddress || isOwnAddress || isSending) && styles.buttonDisabled
           ]}
           onPress={handleSend}
-          disabled={!isValidAmount || !isValidAddress || isSending}
+          disabled={!isValidAmount || !isValidAddress || isOwnAddress || isSending}
         >
           <Text style={styles.sendFormSendButtonText}>
             {isSending ? 'Sending...' : 'Send'}
