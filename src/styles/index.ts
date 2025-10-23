@@ -230,7 +230,8 @@ export const styles = StyleSheet.create({
   },
   recipientInput: {
     minWidth: '100%',
-    flex: 1,
+    minHeight: 48,
+    textAlignVertical: 'center',
   },
   insufficientFundsText: {
     fontSize: 14,
