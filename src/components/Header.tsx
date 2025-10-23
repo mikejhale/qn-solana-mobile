@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { styles } from '../styles';
 import { shortenAddress } from '../utils/addressUtils';
 
@@ -16,16 +17,39 @@ export const Header: React.FC<HeaderProps> = ({
   onAddressPress, 
   onConnect 
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyAddress = async () => {
+    if (connectedAddress) {
+      try {
+        await Clipboard.setStringAsync(connectedAddress);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      } catch (error) {
+        console.error('Failed to copy address:', error);
+      }
+    }
+  };
   return (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>Solana dApp</Text>
       {connectedAddress ? (
-        <TouchableOpacity
-          style={styles.addressButton}
-          onPress={onAddressPress}
-        >
-          <Text style={styles.addressButtonText}>{shortenAddress(connectedAddress)}</Text>
-        </TouchableOpacity>
+        <View style={styles.addressContainer}>
+          <TouchableOpacity
+            style={styles.addressButton}
+            onPress={onAddressPress}
+          >
+            <Text style={styles.addressButtonText}>{shortenAddress(connectedAddress)}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.copyButton, copied && styles.copyButtonCopied]}
+            onPress={handleCopyAddress}
+          >
+            <Text style={styles.copyButtonText}>
+              {copied ? '✓' : '⧉'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity
           style={[styles.connectButton, isConnecting && styles.buttonDisabled]}
@@ -40,3 +64,4 @@ export const Header: React.FC<HeaderProps> = ({
     </View>
   );
 };
+

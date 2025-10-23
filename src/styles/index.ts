@@ -21,17 +21,39 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   addressButton: {
     backgroundColor: '#9945FF',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
   },
+  copyButton: {
+    backgroundColor: '#e9ecef',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 32,
+  },
+  copyButtonCopied: {
+    backgroundColor: '#28a745',
+  },
   addressButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
     fontFamily: 'monospace',
+  },
+  copyButtonText: {
+    color: '#6c757d',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   connectButton: {
     backgroundColor: '#9945FF',
@@ -381,6 +403,19 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 20,
+  },
+  modalCopyButton: {
+    backgroundColor: '#9945FF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  modalCopyButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   modalDisconnectButton: {
     backgroundColor: '#ff4444',
